@@ -1,0 +1,60 @@
+- name: Configuring datanode using Ansible
+  hosts: datanode
+
+  vars_prompt:
+  - name: datanode_dir
+    prompt: "Enter datanode directory name"
+    private: no
+  - name: name_ip
+    prompt: "Enter namenode IP Address"
+    private: no
+
+  tasks:
+  - name: Disabling Firewall
+    shell: "service firewalld stop"
+
+  - name: Set setenforce to 0
+    shell: "setenforce 0"
+
+  - name: Installing JDK software
+    shell: "rpm -ivh jdk-8u171-linux-x64.rpm"
+    ignore_errors: True
+
+
+  - name: Installing Hadoop Software
+    shell: "rpm -ivh hadoop-1.2.1-1.x86_64.rpm --force"
+    ignore_errors: True
+
+  - name: Creation of Datanode Directory
+    file:
+      path: "{{ datanode_dir }}"
+      state: directory
+
+
+  - name: Configuring hdfs-site file
+    blockinfile:
+      path: "/etc/hadoop/hdfs-site.xml"
+      insertafter: "<configuration>"
+      block:
+        <property>
+        <name>dfs.data.dir</name>
+        <value>{{ datanode_dir }}</value>
+        </property>
+
+
+  - name: Configuring core-site file
+    blockinfile:
+      path: "/etc/hadoop/core-site.xml"
+      insertafter: "<configuration>"
+      block:
+        <property>
+        <name>fs.default.name</name>
+        <value>hdfs://{{ name_ip }}:9001</value>
+        </property>
+
+
+  - name: Starting Datanode
+    shell: "hadoop-daemon.sh start datanode"
+
+  - name: Datanode
+    shell: "jps"

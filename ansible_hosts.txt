@@ -1,0 +1,6 @@
+[namenode]
+192.168.0.108  ansible_ssh_user=root  ansible_ssh_pass=773524080ab
+
+[datanode]
+192.168.0.108  ansible_ssh_user=root  ansible_ssh_pass=773524080ab
+
